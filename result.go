@@ -1,42 +1,44 @@
 package result
 
 // Result is a generic type that can be used to represent a successful or failed operation.
-type Result[T any] struct {
-	success T
+type Result[S any] struct {
+	success S
 	failure error
 }
 
 // Success creates a new Result with a successful value.
-func Success[T any](value T) Result[T] {
-	return Result[T]{success: value}
+func Success[S any](value S) Result[S] {
+	return Result[S]{success: value}
 }
 
 // Failure creates a new Result with a failure value.
-func Failure[T any](err error) Result[T] {
-	return Result[T]{failure: err}
+func Failure[S any](err error) Result[S] {
+	return Result[S]{failure: err}
 }
 
 // IsSuccess returns true if the Result is a success.
-func (r Result[T]) IsSuccess() bool {
+func (r Result[S]) IsSuccess() bool {
 	return r.failure == nil
 }
 
 // IsFailure returns true if the Result is a failure.
-func (r Result[T]) IsFailure() bool {
+func (r Result[S]) IsFailure() bool {
 	return r.failure != nil
 }
 
 // GetSuccess returns the successful value of the Result.
-func (r Result[T]) GetSuccess() T {
+func (r Result[S]) GetSuccess() S {
 	return r.success
 }
 
 // GetFailure returns the failure value of the Result.
-func (r Result[T]) GetFailure() error {
+func (r Result[S]) GetFailure() error {
 	return r.failure
 }
 
-// Map applies a function to the successful value of the Result if it is a success and returns a new Result.
+// Map applies a function to the successful value of the Result if it is a success
+// and returns a new Result with a new success type.
+//
 // Should be used when the mapping function returns a value.
 // This is useful when you have a function that can't return an error.
 //
@@ -52,14 +54,16 @@ func (r Result[T]) GetFailure() error {
 //		plusAgeResult := result.Map(r, incrementAge)
 //		fmt.Println(plusAgeResult.GetSuccess().Age) // 31
 //	}
-func Map[T any, S any](r Result[T], f func(T) S) Result[S] {
+func Map[S any, NS any](r Result[S], f func(S) NS) Result[NS] {
 	if r.IsSuccess() {
 		return Success(f(r.GetSuccess()))
 	}
-	return Result[S]{failure: r.failure}
+	return Result[NS]{failure: r.failure}
 }
 
-// Map applies a function to the successful value of the Result if it is a success and returns a new Result.
+// Map applies a function to the successful value of the Result if it is a success
+// and returns a new Result with the same success type.
+//
 // Should be used when the mapping function returns a value of the same type, then you can chain the calls.
 // This is useful when you have a function that can't return an error.
 //
@@ -75,14 +79,16 @@ func Map[T any, S any](r Result[T], f func(T) S) Result[S] {
 //		incrementedAge := r.Map(incrementAge).Map(incrementAge)
 //		fmt.Println(incrementedAge.GetSuccess().Age) // 32, because the age was incremented twice
 //	}
-func (r Result[T]) Map(f func(T) T) Result[T] {
+func (r Result[S]) Map(f func(S) S) Result[S] {
 	if r.IsSuccess() {
 		return Success(f(r.GetSuccess()))
 	}
-	return Result[T]{failure: r.failure}
+	return Result[S]{failure: r.failure}
 }
 
-// FlatMap applies a function to the successful value of the Result if it is a success and returns a new Result.
+// FlatMap applies a function to the successful value of the Result if it is a success
+// and returns a new Result with a new success type.
+//
 // Should be used when the mapping function returns a Result.
 // This is useful when you have a function that can return an error.
 //
@@ -100,14 +106,16 @@ func (r Result[T]) Map(f func(T) T) Result[T] {
 //		r := result.Success[Person](Person{Name: "John", Age: 30})
 //		potentialErrorResult := result.FlatMap(r, canReturnError)
 //	}
-func FlatMap[T any, S any](r Result[T], f func(T) Result[S]) Result[S] {
+func FlatMap[S any, NS any](r Result[S], f func(S) Result[NS]) Result[NS] {
 	if r.IsSuccess() {
 		return f(r.GetSuccess())
 	}
-	return Result[S]{failure: r.failure}
+	return Result[NS]{failure: r.failure}
 }
 
-// FlatMap applies a function to the successful value of the Result if it is a success and returns a new Result.
+// FlatMap applies a function to the successful value of the Result if it is a success
+// and returns a new Result with the same success type.
+//
 // Should be used when the mapping function returns a Result of the same type, then you can chain the calls.
 // This is useful when you have a function that can return an error.
 //
@@ -125,9 +133,9 @@ func FlatMap[T any, S any](r Result[T], f func(T) Result[S]) Result[S] {
 //		potentialError := r.FlatMap(canReturnError).Map(incrementAge)
 //		fmt.Println(potentialError.IsFailure()) // true, because first FlatMap returns an error
 //	}
-func (r Result[T]) FlatMap(f func(T) Result[T]) Result[T] {
+func (r Result[S]) FlatMap(f func(S) Result[S]) Result[S] {
 	if r.IsSuccess() {
 		return f(r.GetSuccess())
 	}
-	return Result[T]{failure: r.failure}
+	return Result[S]{failure: r.failure}
 }

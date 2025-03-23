@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/sillen102/result"
+	"github.com/sillen102/go-result"
 )
 
 type Person struct {

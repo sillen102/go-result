@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/sillen102/result"
+	"github.com/sillen102/go-result"
 )
 
 func TestSuccess(t *testing.T) {

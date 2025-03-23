@@ -17,7 +17,7 @@ func main() {
 	fmt.Println(incrementedAge.GetSuccess().Age) // 32, because the age was incremented twice
 
 	r = result.Success(Person{Name: "John", Age: 30})
-	potentialError := r.ThenTry(canReturnError).Then(incrementAge)
+	potentialError := r.ThenWith(canReturnError).Then(incrementAge)
 	fmt.Println(potentialError.IsFailure()) // true, because first FlatMap returns an error
 }
 

@@ -12,12 +12,12 @@ type Person struct {
 }
 
 func main() {
-	r := result.Success[Person](Person{Name: "John", Age: 30})
-	incrementedAge := r.Map(incrementAge).Map(incrementAge)
+	r := result.Success(Person{Name: "John", Age: 30})
+	incrementedAge := r.Then(incrementAge).Then(incrementAge)
 	fmt.Println(incrementedAge.GetSuccess().Age) // 32, because the age was incremented twice
 
-	r = result.Success[Person](Person{Name: "John", Age: 30})
-	potentialError := r.FlatMap(canReturnError).Map(incrementAge)
+	r = result.Success(Person{Name: "John", Age: 30})
+	potentialError := r.ThenTry(canReturnError).Then(incrementAge)
 	fmt.Println(potentialError.IsFailure()) // true, because first FlatMap returns an error
 }
 

@@ -44,163 +44,163 @@ func TestFailure(t *testing.T) {
 	}
 }
 
-func TestMap(t *testing.T) {
-	// Test Map with success
+func TestTransform(t *testing.T) {
+	// Test Transform with success
 	r := result.Success(42)
-	mappedR := result.Map(r, func(i int) string {
+	transformedR := result.Transform(r, func(i int) string {
 		return "value: " + string(rune(i))
 	})
 
-	if !mappedR.IsSuccess() {
-		t.Error("Expected mapped result to be success")
+	if !transformedR.IsSuccess() {
+		t.Error("Expected transformed result to be success")
 	}
 
-	if mappedR.GetSuccess() != "value: *" {
-		t.Errorf("Expected mapped value to be 'value: *', got %v", mappedR.GetSuccess())
+	if transformedR.GetSuccess() != "value: *" {
+		t.Errorf("Expected transformed value to be 'value: *', got %v", transformedR.GetSuccess())
 	}
 
-	// Test Map with failure
+	// Test Transform with failure
 	testErr := errors.New("test error")
 	r = result.Failure[int](testErr)
-	mappedR = result.Map(r, func(i int) string {
+	transformedR = result.Transform(r, func(i int) string {
 		return "value: " + string(rune(i))
 	})
 
-	if !mappedR.IsFailure() {
-		t.Error("Expected mapped result to be failure")
+	if !transformedR.IsFailure() {
+		t.Error("Expected transformed result to be failure")
 	}
 
-	if !errors.Is(testErr, mappedR.GetFailure()) {
-		t.Errorf("Expected failure to be preserved, got %v", mappedR.GetFailure())
+	if !errors.Is(testErr, transformedR.GetFailure()) {
+		t.Errorf("Expected failure to be preserved, got %v", transformedR.GetFailure())
 	}
 }
 
-func TestResultMap(t *testing.T) {
-	// Test Result.Map with success
+func TestResultThen(t *testing.T) {
+	// Test Result.Then with success
 	r := result.Success(42)
-	mappedR := r.Map(func(i int) int {
+	transformedR := r.Then(func(i int) int {
 		return i * 2
 	})
 
-	if !mappedR.IsSuccess() {
-		t.Error("Expected mapped result to be success")
+	if !transformedR.IsSuccess() {
+		t.Error("Expected transformed result to be success")
 	}
 
-	if mappedR.GetSuccess() != 84 {
-		t.Errorf("Expected mapped value to be 84, got %v", mappedR.GetSuccess())
+	if transformedR.GetSuccess() != 84 {
+		t.Errorf("Expected transformed value to be 84, got %v", transformedR.GetSuccess())
 	}
 
-	// Test Result.Map with failure
+	// Test Result.Then with failure
 	testErr := errors.New("test error")
 	r = result.Failure[int](testErr)
-	mappedR = r.Map(func(i int) int {
+	transformedR = r.Then(func(i int) int {
 		return i * 2
 	})
 
-	if !mappedR.IsFailure() {
-		t.Error("Expected mapped result to be failure")
+	if !transformedR.IsFailure() {
+		t.Error("Expected transformed result to be failure")
 	}
 
-	if !errors.Is(testErr, mappedR.GetFailure()) {
-		t.Errorf("Expected failure to be preserved, got %v", mappedR.GetFailure())
+	if !errors.Is(testErr, transformedR.GetFailure()) {
+		t.Errorf("Expected failure to be preserved, got %v", transformedR.GetFailure())
 	}
 }
 
-func TestFlatMap(t *testing.T) {
-	// Test FlatMap with success -> success
+func TestThenWith(t *testing.T) {
+	// Test ThenWith with success -> success
 	r := result.Success(42)
-	flatMappedR := result.FlatMap(r, func(i int) result.Result[string] {
+	thenWithR := result.ThenWith(r, func(i int) result.Result[string] {
 		return result.Success("value: " + string(rune(i)))
 	})
 
-	if !flatMappedR.IsSuccess() {
-		t.Error("Expected flat-mapped result to be success")
+	if !thenWithR.IsSuccess() {
+		t.Error("Expected then-with result to be success")
 	}
 
-	if flatMappedR.GetSuccess() != "value: *" {
-		t.Errorf("Expected flat-mapped value to be 'value: *', got %v", flatMappedR.GetSuccess())
+	if thenWithR.GetSuccess() != "value: *" {
+		t.Errorf("Expected then-with value to be 'value: *', got %v", thenWithR.GetSuccess())
 	}
 
-	// Test FlatMap with success -> failure
+	// Test ThenWith with success -> failure
 	r = result.Success(42)
 	testErr := errors.New("function error")
-	flatMappedR = result.FlatMap(r, func(i int) result.Result[string] {
+	thenWithR = result.ThenWith(r, func(i int) result.Result[string] {
 		return result.Failure[string](testErr)
 	})
 
-	if !flatMappedR.IsFailure() {
-		t.Error("Expected flat-mapped result to be failure")
+	if !thenWithR.IsFailure() {
+		t.Error("Expected then-with result to be failure")
 	}
 
-	if !errors.Is(testErr, flatMappedR.GetFailure()) {
-		t.Errorf("Expected failure from function, got %v", flatMappedR.GetFailure())
+	if !errors.Is(testErr, thenWithR.GetFailure()) {
+		t.Errorf("Expected failure from function, got %v", thenWithR.GetFailure())
 	}
 
-	// Test FlatMap with failure
+	// Test ThenWith with failure
 	r = result.Failure[int](errors.New("initial error"))
-	flatMappedR = result.FlatMap(r, func(i int) result.Result[string] {
+	thenWithR = result.ThenWith(r, func(i int) result.Result[string] {
 		return result.Success("should not reach here")
 	})
 
-	if !flatMappedR.IsFailure() {
-		t.Error("Expected flat-mapped result to be failure")
+	if !thenWithR.IsFailure() {
+		t.Error("Expected then-with result to be failure")
 	}
 }
 
-func TestResultFlatMap(t *testing.T) {
-	// Test Result.FlatMap with success -> success
+func TestResultThenTry(t *testing.T) {
+	// Test Result.ThenTry with success -> success
 	r := result.Success(42)
-	flatMappedR := r.FlatMap(func(i int) result.Result[int] {
+	thenTryR := r.ThenTry(func(i int) result.Result[int] {
 		return result.Success(i * 2)
 	})
 
-	if !flatMappedR.IsSuccess() {
-		t.Error("Expected flat-mapped result to be success")
+	if !thenTryR.IsSuccess() {
+		t.Error("Expected then-try result to be success")
 	}
 
-	if flatMappedR.GetSuccess() != 84 {
-		t.Errorf("Expected flat-mapped value to be 84, got %v", flatMappedR.GetSuccess())
+	if thenTryR.GetSuccess() != 84 {
+		t.Errorf("Expected then-try value to be 84, got %v", thenTryR.GetSuccess())
 	}
 
-	// Test Result.FlatMap with success -> failure
+	// Test Result.ThenTry with success -> failure
 	r = result.Success(42)
 	testErr := errors.New("function error")
-	flatMappedR = r.FlatMap(func(i int) result.Result[int] {
+	thenTryR = r.ThenTry(func(i int) result.Result[int] {
 		return result.Failure[int](testErr)
 	})
 
-	if !flatMappedR.IsFailure() {
-		t.Error("Expected flat-mapped result to be failure")
+	if !thenTryR.IsFailure() {
+		t.Error("Expected then-try result to be failure")
 	}
 
-	if !errors.Is(testErr, flatMappedR.GetFailure()) {
-		t.Errorf("Expected failure from function, got %v", flatMappedR.GetFailure())
+	if !errors.Is(testErr, thenTryR.GetFailure()) {
+		t.Errorf("Expected failure from function, got %v", thenTryR.GetFailure())
 	}
 
-	// Test Result.FlatMap with failure
+	// Test Result.ThenTry with failure
 	r = result.Failure[int](errors.New("initial error"))
-	flatMappedR = r.FlatMap(func(i int) result.Result[int] {
+	thenTryR = r.ThenTry(func(i int) result.Result[int] {
 		return result.Success(i * 2)
 	})
 
-	if !flatMappedR.IsFailure() {
-		t.Error("Expected flat-mapped result to be failure")
+	if !thenTryR.IsFailure() {
+		t.Error("Expected then-try result to be failure")
 	}
 }
 
 func TestChaining(t *testing.T) {
-	// Test chaining Map and FlatMap
+	// Test chaining Then and ThenTry
 	r := result.Success(42)
 
 	chainedResult := r.
-		Map(func(i int) int { return i + 1 }).
-		FlatMap(func(i int) result.Result[int] {
+		Then(func(i int) int { return i + 1 }).
+		ThenTry(func(i int) result.Result[int] {
 			if i > 40 {
 				return result.Success(i * 2)
 			}
 			return result.Failure[int](errors.New("value too small"))
 		}).
-		Map(func(i int) int { return i - 10 })
+		Then(func(i int) int { return i - 10 })
 
 	if !chainedResult.IsSuccess() {
 		t.Error("Expected chained result to be success")
@@ -215,8 +215,8 @@ func TestChaining(t *testing.T) {
 	r = result.Failure[int](testErr)
 
 	chainedResult = r.
-		Map(func(i int) int { return i + 1 }).
-		FlatMap(func(i int) result.Result[int] { return result.Success(i * 2) })
+		Then(func(i int) int { return i + 1 }).
+		ThenTry(func(i int) result.Result[int] { return result.Success(i * 2) })
 
 	if !chainedResult.IsFailure() {
 		t.Error("Expected chained result to be failure")
@@ -224,5 +224,105 @@ func TestChaining(t *testing.T) {
 
 	if !errors.Is(testErr, chainedResult.GetFailure()) {
 		t.Errorf("Expected failure to be preserved through chain, got %v", chainedResult.GetFailure())
+	}
+}
+
+func TestGetSuccessOr(t *testing.T) {
+	// Test with success
+	r := result.Success(42)
+	value := r.GetSuccessOr(0)
+	if value != 42 {
+		t.Errorf("Expected 42, got %v", value)
+	}
+
+	// Test with failure
+	r = result.Failure[int](errors.New("test error"))
+	value = r.GetSuccessOr(0)
+	if value != 0 {
+		t.Errorf("Expected default value 0, got %v", value)
+	}
+}
+
+func TestMatch(t *testing.T) {
+	// Test with success
+	r := result.Success(42)
+	successCalled := false
+	failureCalled := false
+
+	r.Match(
+		func(i int) {
+			successCalled = true
+			if i != 42 {
+				t.Errorf("Expected 42, got %v", i)
+			}
+		},
+		func(err error) {
+			failureCalled = true
+		},
+	)
+
+	if !successCalled {
+		t.Error("Success function was not called")
+	}
+	if failureCalled {
+		t.Error("Failure function was called unexpectedly")
+	}
+
+	// Test with failure
+	testErr := errors.New("test error")
+	r = result.Failure[int](testErr)
+	successCalled = false
+	failureCalled = false
+	var capturedErr error
+
+	r.Match(
+		func(i int) {
+			successCalled = true
+		},
+		func(err error) {
+			failureCalled = true
+			capturedErr = err
+		},
+	)
+
+	if successCalled {
+		t.Error("Success function was called unexpectedly")
+	}
+	if !failureCalled {
+		t.Error("Failure function was not called")
+	}
+	if !errors.Is(capturedErr, testErr) {
+		t.Errorf("Expected error %v, got %v", testErr, capturedErr)
+	}
+}
+
+func TestTry(t *testing.T) {
+	// Test with success case
+	successFunc := func() (int, error) {
+		return 42, nil
+	}
+
+	r := result.Try(successFunc())
+
+	if !r.IsSuccess() {
+		t.Error("Expected result to be success")
+	}
+	if r.GetSuccess() != 42 {
+		t.Errorf("Expected 42, got %v", r.GetSuccess())
+	}
+
+	// Test with failure case
+	testErr := errors.New("test error")
+	failureFunc := func() (string, error) {
+		return "", testErr
+	}
+
+	r2 := result.Try(failureFunc())
+
+	if !r2.IsFailure() {
+		t.Error("Expected result to be failure")
+	}
+	if !errors.Is(r2.GetFailure(), testErr) {
+		t.Errorf("Expected error %v, got %v", testErr, r2.GetFailure())
 	}
 }
